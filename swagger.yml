@@ -1,0 +1,1140 @@
+swagger: "2.0"
+
+################################################################################
+#                              API Information                                 #
+################################################################################
+info:
+  version: "1.0.0"
+  title: Wrike REST API
+  description: "Definition of the [Wrike API 3.0](https://developers.wrike.com/documentation/api/overview)."
+host: www.wrike.com
+basePath: /api/v3
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+
+################################################################################
+#                                  Security                                    #
+################################################################################
+securityDefinitions:
+  oauth:
+    type: oauth2
+    flow: accessCode
+    authorizationUrl: https://www.wrike.com/oauth2/authorize?client_id={client_id}&response_type=code&redirect_uri={redirect_uri}
+    tokenUrl: https://www.wrike.com/oauth2/token
+    scopes:
+      basic: |
+       to read any and all data related to Wrike
+  token:
+    type: apiKey
+    description: "The authentication token"
+    name: Authorization
+    in: header
+security:
+  - oauth:
+    - basic
+  - token: []
+
+################################################################################
+#                                           Paths                              #
+################################################################################
+paths:
+  /contacts:
+    get:
+      description: "List contacts of all users and user groups in all accessible"
+      operationId: getContacts
+      parameters:
+        - name: me
+          in: query
+          description: "If present - only contact info of requesting user is returned"
+          required: false
+          type: boolean
+        - name: metadata
+          in: query
+          description: "Metadata filter, exact match for metadata key or key-value pair"
+          required: false
+          type: string
+        - name: fields
+          in: query
+          description: "Json string array of optional fields to be included in the response model"
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Contact'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /contacts/{contactId}:
+    get:
+      description: "List contacts of specified users and user groups"
+      operationId: getContactsById
+      parameters:
+        - name: contactId
+          in: path
+          description: "If present - only contact info of requesting user is returned"
+          required: true
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
+        - name: metadata
+          in: query
+          description: "Metadata filter, exact match for metadata key or key-value pair"
+          required: false
+          type: string
+        - name: fields
+          in: query
+          description: "Json string array of optional fields to be included in the response model"
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Contact'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      description: "Update contact by Id. Please note that only the contact whose the API key belongs to may be updated. For updating users and groups data, you need to use the User and Group related methods."
+      operationId: updateMyContact
+      consumes:
+        - "application/x-www-form-urlencoded"
+      security:
+        - oauth:
+          - basic
+        - token: []
+      parameters:
+        - name: contactId
+          in: path
+          description: "The contact ID"
+          required: true
+          type: string
+        - name: metadata
+          in: formData
+          description: "Metadata filter, exact match for metadata key or key-value pair"
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Contact'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/Error'
+            
+            
+# @todo Handle following methods:
+# - Users: https://developers.wrike.com/documentation/api/methods/query-user
+# - Groups: https://developers.wrike.com/documentation/api/methods/query-groups
+# - Invitations: https://developers.wrike.com/documentation/api/methods/query-invitations
+# - Accounts: https://developers.wrike.com/documentation/api/methods/query-accounts
+# - Workflows: https://developers.wrike.com/documentation/api/methods/query-workflows
+# - Custom Fields: https://developers.wrike.com/documentation/api/methods/query-custom-fields
+            
+  /folders:
+    get:
+      description: "Returns list of entries required to build a folder tree for all accounts. This list contains the virtual root and recycle bin folders for each account, which can be used as root nodes for trees. The IDs of the virtual folder could be obtained from the '/accounts' method response. Note: when any of query filter parameters are present (e.g. descendants=false, metadata) response is switched to Folder model."
+      operationId: getFolders
+      parameters:
+        - name: permalink
+          in: query
+          description: "Folder permalink, exact match"
+          required: false
+          type: string
+        - name: descendants
+          in: query
+          description: "Adds all descendant folders to search scope"
+          required: false
+          type: boolean
+        - name: metadata
+          in: query
+          description: "Metadata filter, exact match for metadata key or key-value pair"
+          required: false
+          type: string
+        - name: customField
+          in: query
+          description: "Custom field filter (id/value). JSON object with 'id' and 'value' properties."
+          required: false
+          type: string
+        - name: updatedDate
+          in: query
+          description: >
+            Updated date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: project
+          in: query
+          description: "Get only projects (true) / only folders (false)"
+          required: false
+          type: boolean
+        - name: deleted
+          in: query
+          description: "Get folders from Root (false) / Recycle Bin (true)"
+          required: false
+          type: boolean
+        # @todo handle fields
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Folder'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/Error'
+              
+  /folders/{folderId}/folders:
+    get:
+      description: "Returns a list of tree entries for subtree of this folder. For root and recycle bin folders, returns folder subtrees of root and recycle bin respectively."
+      operationId: getFoldersFromFolderId
+      parameters:
+        - name: folderId
+          in: path
+          description: "The folder ID"
+          required: true
+          type: string
+        - name: permalink
+          in: query
+          description: "Folder permalink, exact match"
+          required: false
+          type: string
+        - name: descendants
+          in: query
+          description: "Adds all descendant folders to search scope"
+          required: false
+          type: boolean
+        - name: metadata
+          in: query
+          description: "Metadata filter, exact match for metadata key or key-value pair"
+          required: false
+          type: string
+        - name: customField
+          in: query
+          description: "Custom field filter (id/value)"
+          required: false
+          type: string
+        - name: updatedDate
+          in: query
+          description: >
+            Updated date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: project
+          in: query
+          description: "Get only projects (true) / only folders (false)"
+          required: false
+          type: boolean
+        # @todo handle fields
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Folder'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/Error'
+   
+# Handle remaining methods for: https://developers.wrike.com/documentation/api/methods/folders-&-projects
+
+  /tasks:
+    get:
+      description: "Search among all tasks in all accounts."
+      operationId: getTasks
+      parameters:
+        - name: descendants
+          in: query
+          description: "Adds all descendant folders to search scope"
+          required: false
+          type: boolean
+        - name: title
+          in: query
+          description: "Title filter, exact match"
+          required: false
+          type: string
+        - name: status
+          in: query
+          description: "Status filter, match with any of specified constants"
+          required: false
+          type: string
+          enum:
+            - "Active"
+            - "Completed"
+            - "Deferred"
+            - "Cancelled"
+        - name: importance
+          in: query
+          description: "Importance filter, exact match."
+          required: false
+          type: string
+          enum:
+            - "High"
+            - "Normal"
+            - "Low"
+        - name: startDate
+          in: query
+          description: >
+            Start date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - equal (Optional): Date exact match value \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: dueDate
+          in: query
+          description: >
+            Due date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - equal (Optional): Date exact match value \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: scheduledDate
+          in: query
+          description: >
+            Scheduled date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - equal (Optional): Date exact match value \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: createdDate
+          in: query
+          description: >
+            Created date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - equal (Optional): Date exact match value \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: updatedDate
+          in: query
+          description: >
+            Updated date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - equal (Optional): Date exact match value \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: completedDate
+          in: query
+          description: >
+            Completed date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - equal (Optional): Date exact match value \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: authors
+          in: query
+          description: "Authors filter, match of any"
+          required: true
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
+        - name: responsibles
+          in: query
+          description: "Responsibles filter, match of any"
+          required: true
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
+        - name: shareds
+          in: query
+          description: "Shared users filter, match of any"
+          required: true
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
+        - name: permalink
+          in: query
+          description: "Task permalink, exact match"
+          required: false
+          type: string
+        - name: type
+          in: query
+          description: "Task type."
+          required: false
+          type: string
+          enum:
+            - "Backlog"
+            - "Milestone"
+            - "Planned"
+        - name: limit
+          in: query
+          description: "Limit on number of returned tasks"
+          required: false
+          type: integer
+        - name: sortField
+          in: query
+          description: "Sort field."
+          required: false
+          type: string
+          enum:
+            - "CreatedDate"
+            - "UpdatedDate"
+            - "CompletedDate"
+            - "DueDate"
+            - "Status"
+            - "Importance"
+            - "Title"
+        - name: sortOrder
+          in: query
+          description: "Sort order."
+          required: false
+          type: string
+          enum:
+            - "Asc"
+            - "Desc"
+          default: "Asc"
+        - name: subTasks
+          in: query
+          description: "Adds subtasks to search scope"
+          required: false
+          type: boolean
+        - name: pageSize
+          in: query
+          description: "Page size"
+          required: false
+          type: number
+          format: float
+        - name: nextPageToken
+          in: query
+          description: "Next page token, overrides any other parameters in request."
+          required: false
+          type: string
+        - name: metadata
+          in: query
+          description: "Metadata filter, exact match for metadata key or key-value pair"
+          required: false
+          type: string
+        - name: customField
+          in: query
+          description: "Custom field filter (id/value). JSON object with 'id' and 'value' properties."
+          required: false
+          type: string
+        - name: customStatuses
+          in: query
+          description: "Custom statuses filter. JSON array with a list of Custom status IDs."
+          required: false
+          type: string
+        - name: fields
+          in: query
+          description: >
+            "Json string array of optional fields to be included in the response model."
+            "Available fields: \n"
+            "- authorIds: Author IDs"
+            "- hasAttachments: Has attachments"
+            "- attachmentCount: Attachment count"
+            "- parentIds: List of task parent folder"
+            "- superParentIds: List of task super parent folder"
+            "- sharedIds: List of user IDs, who have task share"
+            "- responsibleIds: List of responsible user IDs"
+            "- description: Description"
+            "- briefDescription: Brief description"
+            "- recurrent: Is a task recurrent"
+            "- superTaskIds: List of supertask IDs"
+            "- subTaskIds: List of subtask IDs"
+            "- dependencyIds: Dependency IDs"
+            "- metadata: Task metadata entries"
+            "- customFields: Custom fields"
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Task'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /tasks/{taskId}:
+    get:
+      description: "Returns complete information about single or multiple tasks."
+      operationId: getTasksById
+      parameters:
+        - name: taskId
+          in: path
+          description: "A list of task IDS - up to 100 IDs"
+          required: true
+          type: array
+          items:
+            type: string
+          collectionFormat: csv
+        - name: fields
+          in: query
+          description: >
+            "Json string array of optional fields to be included in the response model."
+            "Available fields: \n"
+            "- recurrent: Add field to indicate if task is recurrent"
+            "- attachmentCount: Attachment count"
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Task'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/Error'
+            
+# Handle remaining methods for: https://developers.wrike.com/documentation/api/methods/query-tasks 
+
+
+
+
+# @todo Handle following methods:
+# - Comments: https://developers.wrike.com/documentation/api/methods/get-comments
+# - Dependencies: https://developers.wrike.com/documentation/api/methods/query-dependencies
+
+
+  /timelogs:
+    get:
+      description: "Get all timelog records in all accounts."
+      operationId: getTimelogs
+      parameters:
+        - name: createdDate
+          in: query
+          description: >
+            Created date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: trackedDate
+          in: query
+          description: >
+            Tracked date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - equal (Optional): Date exact match value \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: me
+          in: query
+          description: "If present - only contact info of requesting user is returned"
+          required: false
+          type: boolean
+        - name: descendants
+          in: query
+          description: "Adds all descendant tasks to search scope"
+          required: false
+          type: boolean
+          default: true
+        - name: subTasks
+          in: query
+          description: "Adds subtasks to search scope"
+          required: false
+          type: boolean
+          default: true
+        - name: plainText
+          in: query
+          description: "Get comment text as plain text, HTML otherwise"
+          required: false
+          type: boolean
+          default: false
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Timelog'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /contacts/{contactId}/timelogs:
+    get:
+      description: "Get all timelog records that were created by the user."
+      operationId: getTimelogsForContact
+      parameters:
+        - name: contactId
+          in: path
+          description: "The contact ID"
+          required: true
+          type: string
+        - name: createdDate
+          in: query
+          description: >
+            Created date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: trackedDate
+          in: query
+          description: >
+            Tracked date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - equal (Optional): Date exact match value \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: me
+          in: query
+          description: "If present - only contact info of requesting user is returned"
+          required: false
+          type: boolean
+        - name: descendants
+          in: query
+          description: "Adds all descendant tasks to search scope"
+          required: false
+          type: boolean
+          default: true
+        - name: subTasks
+          in: query
+          description: "Adds subtasks to search scope"
+          required: false
+          type: boolean
+          default: true
+        - name: plainText
+          in: query
+          description: "Get comment text as plain text, HTML otherwise"
+          required: false
+          type: boolean
+          default: false
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Timelog'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /accounts/{accountId}/timelogs:
+    get:
+      description: "Get all timelog records in the account."
+      operationId: getTimelogsForAccount
+      parameters:
+        - name: accountId
+          in: path
+          description: "The contact ID"
+          required: true
+          type: string
+        - name: createdDate
+          in: query
+          description: >
+            Created date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: trackedDate
+          in: query
+          description: >
+            Tracked date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - equal (Optional): Date exact match value \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: me
+          in: query
+          description: "If present - only contact info of requesting user is returned"
+          required: false
+          type: boolean
+        - name: descendants
+          in: query
+          description: "Adds all descendant tasks to search scope"
+          required: false
+          type: boolean
+          default: true
+        - name: subTasks
+          in: query
+          description: "Adds subtasks to search scope"
+          required: false
+          type: boolean
+          default: true
+        - name: plainText
+          in: query
+          description: "Get comment text as plain text, HTML otherwise"
+          required: false
+          type: boolean
+          default: false
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Timelog'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/Error'            
+            
+  /folders/{folderId}/timelogs:
+    get:
+      description: "Get all timelog records for a folder."
+      operationId: getTimelogsForFolder
+      parameters:
+        - name: folderId
+          in: path
+          description: "The contact ID"
+          required: true
+          type: string
+        - name: createdDate
+          in: query
+          description: >
+            Created date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: trackedDate
+          in: query
+          description: >
+            Tracked date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - equal (Optional): Date exact match value \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: me
+          in: query
+          description: "If present - only contact info of requesting user is returned"
+          required: false
+          type: boolean
+        - name: descendants
+          in: query
+          description: "Adds all descendant tasks to search scope"
+          required: false
+          type: boolean
+          default: true
+        - name: subTasks
+          in: query
+          description: "Adds subtasks to search scope"
+          required: false
+          type: boolean
+          default: true
+        - name: plainText
+          in: query
+          description: "Get comment text as plain text, HTML otherwise"
+          required: false
+          type: boolean
+          default: false
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Timelog'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /tasks/{taskId}/timelogs:
+    get:
+      description: "Get all timelog records for a task."
+      operationId: getTimelogsForTask
+      parameters:
+        - name: taskId
+          in: path
+          description: "The contact ID"
+          required: true
+          type: string
+        - name: createdDate
+          in: query
+          description: >
+            Created date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: trackedDate
+          in: query
+          description: >
+            Tracked date filter, date match or range (Timestamp semi-open interval) \n
+            - start (Optional): Range start \n
+            - equal (Optional): Date exact match value \n
+            - end (Optional): Range end \n
+            "Format: yyyy-MM-dd'T'HH:mm:ss'Z' ('T'HH:mm:ss is optional)"
+          required: false
+          type: string
+        - name: me
+          in: query
+          description: "If present - only contact info of requesting user is returned"
+          required: false
+          type: boolean
+        - name: descendants
+          in: query
+          description: "Adds all descendant tasks to search scope"
+          required: false
+          type: boolean
+          default: true
+        - name: subTasks
+          in: query
+          description: "Adds subtasks to search scope"
+          required: false
+          type: boolean
+          default: true
+        - name: plainText
+          in: query
+          description: "Get comment text as plain text, HTML otherwise"
+          required: false
+          type: boolean
+          default: false
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+              data:
+                type: array
+                items:
+                  $ref: '#/definitions/Timelog'
+        default:
+          description: Error
+          schema:
+            $ref: '#/definitions/Error'            
+            
+            
+
+# Handle remaining methods for: https://developers.wrike.com/documentation/api/methods/query-timelogs
+
+
+
+# @todo Handle following methods:
+# - Attachments: https://developers.wrike.com/documentation/api/methods/get-attachments
+# - Version: https://developers.wrike.com/documentation/api/methods/api-version
+# - IDs: https://developers.wrike.com/documentation/api/methods/legacy-api-v2-ids-converter
+# - Colors: https://developers.wrike.com/documentation/api/methods/query-colors
+
+
+
+################################################################################
+#                                 Definitions                                  #
+################################################################################
+definitions:
+  
+  Contact:
+    type: object
+    properties:
+      id:
+        type: integer
+      firstName:
+        type: string
+      lastName:
+        type: string
+      type:
+        type: string
+      profiles:
+        type: array
+        items:
+          $ref: '#/definitions/Profile'
+      avatarUrl:
+        type: string
+      timezone:
+        type: string
+      locale:
+        type: string
+      deleted:
+        type: boolean
+      me:
+        type: boolean
+      title:
+        type: string
+      companyName:
+        type: string
+      phone:
+        type: string
+      location:
+        type: string
+
+  Profile:
+    type: object
+    properties:
+      accountId:
+        type: string
+      email:
+        type: string
+      role:
+        type: string
+      external:
+        type: boolean
+      admin:
+        type: boolean
+      owner:
+        type: boolean
+
+  Folder:
+    type: object
+    properties:
+      id:
+        type: string
+      title:
+        type: string
+      childIds:
+        type: array
+        items:
+          type: string
+      scope:
+        type: string
+      project:
+        $ref: '#/definitions/Project'
+
+  Project:
+    type: object
+    properties:
+      authorId:
+        type: string
+      ownerIds:
+        type: array
+        items:
+          type: string
+      status:
+        type: string
+      createdDate:
+        type: string
+        format: date-time
+    
+  Task:
+    type: object
+    properties:
+      id:
+        type: string
+      accountid:
+        type: string
+      title:
+        type: string
+      description:
+        type: string
+      briefDescription:
+        type: string
+      parentIds:
+        type: array
+        items:
+          type: string
+      superParentIds:
+        type: array
+        items:
+          type: string
+      sharedIds:
+        type: array
+        items:
+          type: string
+      responsibleIds:
+        type: array
+        items:
+          type: string
+      status:
+        type: string
+      importance:
+        type: string
+      createdDate:
+        type: string
+        format: date-time
+      updatedDate:
+        type: string
+        format: date-time
+      dates:
+        $ref: '#/definitions/Dates'
+      scope:
+       type: string
+      authorIds:
+        type: array
+        items:
+          type: string
+      customStatusId:
+        type: string
+      hasAttachments:
+        type: boolean
+      attachmentCount:
+        type: integer
+      permalink:
+        type: string
+      priority:
+        type: string
+      superTaskIds:
+        type: array
+        items:
+          type: string
+      subTaskIds:
+        type: array
+        items:
+          type: string
+      dependencyIds:
+        type: array
+        items:
+          type: string
+      metadata:
+        type: array
+        items:
+          $ref: '#/definitions/Metadata'
+      customFields:
+        type: array
+        items:
+          type: string
+
+  Timelog:
+    type: object
+    properties:
+      id:
+        type: string
+      taskId:
+        type: string
+      userId:
+        type: string
+      hours:
+        type: number
+        format: float
+      createdDate:
+        type: string
+      trackedDate:
+        type: string
+      comment:
+        type: string
+
+  Dates:
+    type: object
+    properties:
+      type:
+        type: string
+      duration:
+        type: integer
+      start:
+        type: string
+        format: date-time
+      due:
+        type: string
+        format: date-time
+
+  Metadata:
+    type: object
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+        
+  Error:
+    type: object
+    required:
+      - errorDescription
+      - error
+    properties:
+      errorDescription:
+        type: string
+      error:
+        type: string
+

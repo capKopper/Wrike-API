@@ -1,0 +1,9 @@
+{
+    "invokerPackage": "Wrike\\Client",
+    "packagePath": "wrike-php-client",
+    "srcBasePath": "src",
+    "composerVendorName": "capKopper",
+    "gitUserId": "capKopper",
+    "composerProjectName": "Wrike-API",
+    "gitRepoId": "Wrike-API"
+}
