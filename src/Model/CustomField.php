@@ -1,6 +1,6 @@
 <?php
 /**
- * InlineResponse2001
+ * CustomField
  *
  * PHP version 5
  *
@@ -32,14 +32,14 @@ namespace Wrike\Client\Model;
 use \ArrayAccess;
 
 /**
- * InlineResponse2001 Class Doc Comment
+ * CustomField Class Doc Comment
  *
  * @category    Class
  * @package     Wrike\Client
  * @author      Swagger Codegen team
  * @link        https://github.com/swagger-api/swagger-codegen
  */
-class InlineResponse2001 implements ArrayAccess
+class CustomField implements ArrayAccess
 {
     const DISCRIMINATOR = null;
 
@@ -47,15 +47,15 @@ class InlineResponse2001 implements ArrayAccess
       * The original name of the model.
       * @var string
       */
-    protected static $swaggerModelName = 'inline_response_200_1';
+    protected static $swaggerModelName = 'CustomField';
 
     /**
       * Array of property to type mappings. Used for (de)serialization
       * @var string[]
       */
     protected static $swaggerTypes = [
-        'kind' => 'string',
-        'data' => '\Wrike\Client\Model\Folder[]'
+        'id' => 'string',
+        'value' => 'string'
     ];
 
     public static function swaggerTypes()
@@ -68,8 +68,8 @@ class InlineResponse2001 implements ArrayAccess
      * @var string[]
      */
     protected static $attributeMap = [
-        'kind' => 'kind',
-        'data' => 'data'
+        'id' => 'id',
+        'value' => 'value'
     ];
 
 
@@ -78,8 +78,8 @@ class InlineResponse2001 implements ArrayAccess
      * @var string[]
      */
     protected static $setters = [
-        'kind' => 'setKind',
-        'data' => 'setData'
+        'id' => 'setId',
+        'value' => 'setValue'
     ];
 
 
@@ -88,8 +88,8 @@ class InlineResponse2001 implements ArrayAccess
      * @var string[]
      */
     protected static $getters = [
-        'kind' => 'getKind',
-        'data' => 'getData'
+        'id' => 'getId',
+        'value' => 'getValue'
     ];
 
     public static function attributeMap()
@@ -123,8 +123,8 @@ class InlineResponse2001 implements ArrayAccess
      */
     public function __construct(array $data = null)
     {
-        $this->container['kind'] = isset($data['kind']) ? $data['kind'] : null;
-        $this->container['data'] = isset($data['data']) ? $data['data'] : null;
+        $this->container['id'] = isset($data['id']) ? $data['id'] : null;
+        $this->container['value'] = isset($data['value']) ? $data['value'] : null;
     }
 
     /**
@@ -153,43 +153,43 @@ class InlineResponse2001 implements ArrayAccess
 
 
     /**
-     * Gets kind
+     * Gets id
      * @return string
      */
-    public function getKind()
+    public function getId()
     {
-        return $this->container['kind'];
+        return $this->container['id'];
     }
 
     /**
-     * Sets kind
-     * @param string $kind
+     * Sets id
+     * @param string $id
      * @return $this
      */
-    public function setKind($kind)
+    public function setId($id)
     {
-        $this->container['kind'] = $kind;
+        $this->container['id'] = $id;
 
         return $this;
     }
 
     /**
-     * Gets data
-     * @return \Wrike\Client\Model\Folder[]
+     * Gets value
+     * @return string
      */
-    public function getData()
+    public function getValue()
     {
-        return $this->container['data'];
+        return $this->container['value'];
     }
 
     /**
-     * Sets data
-     * @param \Wrike\Client\Model\Folder[] $data
+     * Sets value
+     * @param string $value
      * @return $this
      */
-    public function setData($data)
+    public function setValue($value)
     {
-        $this->container['data'] = $data;
+        $this->container['value'] = $value;
 
         return $this;
     }

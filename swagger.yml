@@ -4,7 +4,7 @@ swagger: "2.0"
 #                              API Information                                 #
 ################################################################################
 info:
-  version: "1.0.0"
+  version: "1.1.0"
   title: Wrike REST API
   description: "Definition of the [Wrike API 3.0](https://developers.wrike.com/documentation/api/overview)."
 host: www.wrike.com
@@ -123,10 +123,6 @@ paths:
       operationId: updateMyContact
       consumes:
         - "application/x-www-form-urlencoded"
-      security:
-        - oauth:
-          - basic
-        - token: []
       parameters:
         - name: contactId
           in: path
@@ -1084,7 +1080,7 @@ definitions:
       customFields:
         type: array
         items:
-          type: string
+          $ref: '#/definitions/CustomField'
 
   Timelog:
     type: object
@@ -1126,6 +1122,14 @@ definitions:
         type: string
       value:
         type: string
+      
+  CustomField:
+    type: object
+    properties:
+      id:
+        type: string
+      value:
+        type: string
         
   Error:
     type: object
@@ -1137,4 +1141,6 @@ definitions:
         type: string
       error:
         type: string
+
+
 

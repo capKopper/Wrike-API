@@ -28,7 +28,7 @@ Name | Type | Description | Notes
 **sub_task_ids** | **string[]** |  | [optional] 
 **dependency_ids** | **string[]** |  | [optional] 
 **metadata** | [**\Wrike\Client\Model\Metadata[]**](Metadata.md) |  | [optional] 
-**custom_fields** | **string[]** |  | [optional] 
+**custom_fields** | [**\Wrike\Client\Model\CustomField[]**](CustomField.md) |  | [optional] 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
