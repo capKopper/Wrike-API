@@ -123,10 +123,6 @@ paths:
       operationId: updateMyContact
       consumes:
         - "application/x-www-form-urlencoded"
-      security:
-        - oauth:
-          - basic
-        - token: []
       parameters:
         - name: contactId
           in: path
@@ -1137,4 +1133,6 @@ definitions:
         type: string
       error:
         type: string
+
+
 
