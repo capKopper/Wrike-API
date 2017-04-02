@@ -101,6 +101,7 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [Contact](docs/Model/Contact.md)
+ - [CustomField](docs/Model/CustomField.md)
  - [Dates](docs/Model/Dates.md)
  - [Error](docs/Model/Error.md)
  - [Folder](docs/Model/Folder.md)

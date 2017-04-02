@@ -1080,7 +1080,7 @@ definitions:
       customFields:
         type: array
         items:
-          type: string
+          $ref: '#/definitions/CustomField'
 
   Timelog:
     type: object
@@ -1119,6 +1119,14 @@ definitions:
     type: object
     properties:
       key:
+        type: string
+      value:
+        type: string
+      
+  CustomField:
+    type: object
+    properties:
+      id:
         type: string
       value:
         type: string
